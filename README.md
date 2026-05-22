@@ -20,19 +20,24 @@ python -m pip install -r requirements.txt
 python index.py
 ```
 
-## Despliegue en Render
+## Despliegue en Vercel
 
 1. Crea un repositorio en GitHub con este proyecto.
-2. En Render, crea un nuevo servicio de tipo `Web Service` y conecta tu repositorio.
-3. Usa el `Start Command` `gunicorn index:app` o deja que Render detecte el `Procfile`.
-4. Agrega estas variables de entorno en Render:
+2. En Vercel, importa el repositorio.
+3. Vercel detectará `vercel.json` y usará `@vercel/python` para desplegar la app.
+4. Agrega estas variables de entorno en Vercel:
    - `SECRET_KEY`
    - `DATABASE_URL`
 
-   Si prefieres, puedes seguir usando `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, y `DB_PASS` en lugar de `DATABASE_URL`.
+   No es necesario usar `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, o `DB_PASS` si ya tienes `DATABASE_URL`.
+
+## Base de datos en Render
+
+- Usa Render solo para crear/gestionar la base de datos PostgreSQL.
+- Copia la URL de conexión de Render y pégala en Vercel como `DATABASE_URL`.
+- Ejemplo de URL:
+  `postgresql://sneaker_point_user:ymMckxB9NtiC4upQpqCewk1NlzhrCQKJ@dpg-d87sb7m7r5hc73f1i9rg-a.oregon-postgres.render.com/sneaker_point`
 
 ## Notas importantes
 
-- Esta aplicación requiere una base de datos PostgreSQL accesible desde Render.
-- Tu URL de base de datos proporcionada debe guardarse en Render como `DATABASE_URL`.
 - No subas tu `.env` ni tus credenciales a GitHub.
