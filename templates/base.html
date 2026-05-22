@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SNEAKER POINT- {% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+
+    <header class="main-header">
+        <div class="header-content">
+            <a href="{{ url_for('index') }}" class="logo">SNEAKER POINT</a>
+            <nav class="main-nav">
+                <a href="{{ url_for('index') }}">Catálogo</a>
+                
+                <a href="#" id="open-size-guide">Guía de tallas</a>
+            </nav>
+            
+           <div class="utility-bar-desktop">
+            <div class="search-container">
+                <form action="{{ url_for('search_products') }}" method="GET" class="search-form-inline">
+                    <input 
+                        type="text" 
+                        name="q" 
+                        placeholder="Buscar solo por Marca" 
+                        aria-label="Buscar productos"
+                        value="{{ search_query if search_query is defined }}">
+                    
+                    <button type="submit">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </form>
+                </div>
+                </div>
+
+            <div class="user-actions">
+                    <a href="{{ url_for('carrito') }}" title="Carrito">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="cart-count">{{ session.get('cart')|length if session.get('cart') else 0 }}</span>
+                    </a>
+                    {% if session.get('loggedin') %}
+                    <details class="profile-menu">
+                        <summary title="Ver información de perfil">
+                            <i class="fas fa-user-circle"></i>
+                        </summary>
+                        <div class="profile-dropdown">
+                            <h3>Mi cuenta</h3>
+                            <div class="profile-summary">
+                                <p><strong>Correo:</strong> {{ session.get('correo_cliente', 'No disponible') }}</p>
+                                <p><strong>Teléfono:</strong> {{ session.get('telefono_cliente', 'No disponible') }}</p>
+                            </div>
+
+                            <form action="{{ url_for('actualizar_perfil') }}" method="POST" class="profile-edit-form">
+                                <label>
+                                    Nombre
+                                    <input type="text" name="nombre" value="{{ session.get('nombre_cliente', '') }}" required>
+                                </label>
+                                <label>
+                                    Apellido
+                                    <input type="text" name="apellido" value="{{ session.get('apellido_cliente', '') }}" required>
+                                </label>
+                                <label>
+                                    Teléfono
+                                    <input type="tel" name="telefono" value="{{ session.get('telefono_cliente', '') }}" required>
+                                </label>
+                                <button type="submit" class="btn-primary btn-small">Guardar cambios</button>
+                            </form>
+                        </div>
+                    </details>
+                    <a href="{{ url_for('logout') }}" title="Cerrar Sesión">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </a>
+                    {% else %}
+                    <a href="{{ url_for('login') }}" title="Iniciar Sesión">
+                        <i class="fas fa-user-circle"></i>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="flash-message flash-{{ category }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+        
+        <main>
+            {% block content %}
+            {% endblock %}
+        </main>
+    </div>
+
+    <footer class="main-footer">
+        <div class="footer-content">
+            <div class="footer-left">
+                <span class="logo-footer">SNEAKER POINT</span>
+                <p>Catálogo de tenis — “Tu estilo, tu pisada.”</p>
+            </div>
+            <div class="footer-center">
+                <button class="footer-link" id="open-about-footer">Conócenos</button>
+                <button class="footer-link" id="open-help-footer">Ayuda</button>
+            </div>
+            <div class="footer-right">
+                <p class="footer-contact-title">¿Necesitas asistencia?</p>
+                <p class="footer-contact-text">Escríbenos o llámanos para recibir ayuda con tus pedidos y consultas.</p>
+                <span class="footer-contact-item"><i class="fas fa-envelope"></i> ayuda@sneakerpoint.com</span>
+                <span class="footer-contact-item"><i class="fas fa-phone-alt"></i> +52 55 1234 5678</span>
+            </div>
+        </div>
+    </footer>
+    
+    <div id="sizeGuideModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            
+            <div class="size-guide-header">
+                <h2>Guía de tallas</h2>
+                <p>A continuación, una tabla orientativa para convertir tallas mexicanas a centímetros y tallas internacionales.</p>
+            </div>
+            
+            <table class="size-table">
+                <thead>
+                    <tr>
+                        <th>Talla (MX)</th>
+                        <th>CM (largo pie)</th>
+                        <th>Talla (EU)</th>
+                        <th>Talla (US)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>20</td><td>12.6</td><td>33</td><td>2</td></tr>
+                    <tr><td>21</td><td>13.3</td><td>34</td><td>3</td></tr>
+                    <tr><td>22</td><td>14.0</td><td>35</td><td>4</td></tr>
+                    <tr><td>23</td><td>14.6</td><td>36</td><td>5</td></tr>
+                    <tr><td>24</td><td>15.3</td><td>37</td><td>6</td></tr>
+                    <tr><td>25</td><td>16.0</td><td>38</td><td>7</td></tr>
+                    <tr><td>26</td><td>16.6</td><td>39</td><td>8</td></tr>
+                    <tr><td>27</td><td>17.3</td><td>40</td><td>9</td></tr>
+                    <tr><td>28</td><td>18.0</td><td>41</td><td>10</td></tr>
+                    <tr><td>29</td><td>18.6</td><td>42</td><td>11</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="aboutModal" class="modal">
+        <div class="modal-content modal-card">
+            <span class="close-button">&times;</span>
+            <h2>Conócenos</h2>
+            <p>En <strong>SNEAKER POINT</strong>, transformamos el movimiento en rendimiento. Somos una empresa especializada en calzado deportivo de alto desempeño, creada para atletas, entusiastas del fitness y personas que desafían sus propios límites diariamente.</p>
+            <p>Desarrollamos tecnología de amortiguación y soporte de última generación para garantizar el máximo confort y optimizar cada zancada. Creemos firmemente que el calzado adecuado es el motor que impulsa el potencial humano.</p>
+            <p>Por ello, combinamos innovación biomecánica con diseños dinámicos y audaces, asegurando que cada par esté listo para superar cualquier desafío, tanto en la pista como en la calle.</p>
+        </div>
+    </div>
+
+    <div id="helpModal" class="modal">
+        <div class="modal-content modal-card">
+            <span class="close-button">&times;</span>
+            <h2>Ayuda</h2>
+            <p>Si necesitas ayuda con cualquier aspecto de tu pedido, talla, envío o devolución, estamos para apoyarte.</p>
+            <div class="help-details">
+                <div>
+                    <strong>Correo:</strong>
+                    <a href="mailto:ayuda@sneakerpoint.com">ayuda@sneakerpoint.com</a>
+                </div>
+                <div>
+                    <strong>Teléfono:</strong>
+                    <a href="tel:+525512345678">+52 55 1234 5678</a>
+                </div>
+            </div>
+            <p class="help-note">Nuestro equipo de atención al cliente está listo para resolver tus dudas y asegurar que tu experiencia con SNEAKER POINT sea ágil y satisfactoria.</p>
+        </div>
+    </div>
+    <!-- ================================================= -->
+    
+    <script>
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const modal = document.getElementById('sizeGuideModal');
+            const openButtons = document.querySelectorAll('#open-size-guide, #open-size-guide-footer');
+            const closeButton = modal.querySelector('.close-button');
+            const aboutModal = document.getElementById('aboutModal');
+            const helpModal = document.getElementById('helpModal');
+            const openAboutFooter = document.getElementById('open-about-footer');
+            const openHelpFooter = document.getElementById('open-help-footer');
+            const modals = [modal, aboutModal, helpModal];
+
+            const openModal = (target) => {
+                target.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            };
+
+            const closeModal = (target) => {
+                target.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            };
+
+            openButtons.forEach(button => {
+                button.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    openModal(modal);
+                });
+            });
+
+            openAboutFooter.addEventListener('click', (e) => {
+                e.preventDefault();
+                openModal(aboutModal);
+            });
+
+            openHelpFooter.addEventListener('click', (e) => {
+                e.preventDefault();
+                openModal(helpModal);
+            });
+
+            modals.forEach(currentModal => {
+                const closeBtn = currentModal.querySelector('.close-button');
+                closeBtn.addEventListener('click', () => closeModal(currentModal));
+            });
+
+            window.addEventListener('click', (e) => {
+                modals.forEach(currentModal => {
+                    if (e.target === currentModal) {
+                        closeModal(currentModal);
+                    }
+                });
+            });
+
+            const flashMessages = document.querySelectorAll('.flash-message');
+            if (flashMessages.length > 0) {
+                flashMessages.forEach(message => {
+                    setTimeout(() => {
+                        message.style.transition = 'opacity 0.5s ease-out';
+                        message.style.opacity = '0';
+                        setTimeout(() => {
+                            message.remove();
+                        }, 500);
+                    }, 3500);
+                });
+            }
+        });
+
+            
+    </script>
+
+    <!-- Icono de ubicación (inferior izquierdo) -->
+    <a href="https://maps.app.goo.gl/cu3uhL8npCmP7JN46" class="location-link" target="_blank" rel="noopener noreferrer" title="Ubicación" aria-label="Ubicación en Google Maps">
+        <i class="fas fa-map-marker-alt"></i>
+    </a>
+
+</body>
+</html>

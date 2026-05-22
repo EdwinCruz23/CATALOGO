@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Resultados de Búsqueda{% endblock %}
+
+{% block content %}
+<h2 class="page-title">
+    Resultados para la Marca: **{{ search_query }}**
+</h2>
+
+{% if products %}
+    <div class="product-grid">
+    {% for product in products %}
+        <div class="product-card">
+            <div class="image-placeholder">
+                <img src="URL_IMAGEN_DEL_PRODUCTO" alt="{{ product[0] }}">
+            </div>
+            
+            <h3>{{ product[0] }}</h3> <p>Marca: "**{{ product[1] }}**"</p> <p>{{ product[2] }}</p> <p class="price">${{ "{:,.2f}".format(product[3]) }}</p> <p class="stock">Stock: Disponible ({{ product[4] }})</p> <p>Color: {{ product[5] }}</p> <a href="/details/{{ product[0] }}" class="btn-details">Ver Detalles</a>
+        </div>
+    {% endfor %}
+    </div>
+{% else %}
+    <p>Lo sentimos, no se encontraron productos que coincidan con la marca **{{ search_query }}**.</p>
+{% endif %}
+
+{% endblock %}

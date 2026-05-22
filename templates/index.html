@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Catálogo de Productos{% endblock %}
+
+{% block content %}
+    
+    <h2 class="catalog-title">🔥 Los Más Vendidos</h2>
+
+    {% if search_query %}
+    <p class="search-info">Resultados de búsqueda para: <strong>{{ search_query }}</strong></p>
+    {% endif %}
+
+    <div class="product-grid">
+        
+        {% for p in productos %}
+        <div class="product-card">
+            
+            <div class="product-image-placeholder">
+                {% if p.imagen_url %}
+                    {% set imagen = p.imagen_url %}
+                    {% if imagen.startswith('http') or imagen.startswith('/') %}
+                        <img src="{{ imagen }}" alt="{{ p.nombre }}" class="product-image">
+                    {% elif imagen.startswith('static/') %}
+                        <img src="/{{ imagen }}" alt="{{ p.nombre }}" class="product-image">
+                    {% else %}
+                        <img src="{{ url_for('static', filename=imagen) }}" alt="{{ p.nombre }}" class="product-image">
+                    {% endif %}
+                {% else %}
+                    <i class="fas fa-camera" style="font-size: 30px;"></i>
+                    <br>IMAGEN NO DISPONIBLE
+                {% endif %}
+            </div>
+            
+            <div class="product-info">
+                <h3 class="product-title">{{ p.nombre | default("Nombre del Producto", true) }}</h3>
+                <p class="product-brand">Marca: "{{ p.marca | default("Marca Desconocida", true) }}"</p>
+                
+                <p class="product-description">
+                    {{ p.descripcion | default("Descripción breve del producto.", true) }}
+                </p>
+
+                <div class="product-pricing">
+                    <p class="product-price">${{ "{:,.2f}".format(p.precio) | default("0.00", true) }}</p>
+                    
+                    {% set stock_class = "stock-out" %}
+                    {% if p.stock > 10 %}
+                        {% set stock_class = "stock-available" %}
+                    {% elif p.stock > 0 %}
+                        {% set stock_class = "stock-low" %}
+                    {% endif %}
+                    
+                    <p class="product-details {{ stock_class }}">
+                        Stock: {% if p.stock > 0 %} Disponible ({{ p.stock }}) {% else %} ¡Agotado! {% endif %}
+                    </p>
+                </div>
+
+                <div class="product-details-extra">
+                    <p>Color: {{ p.color | default("Varios", true) }}</p> 
+                    <p>Talla predeterminada: {{ p.talla | default("-", true) }}</p> 
+                </div>
+
+                <div class="product-actions">
+                    <form action="{{ url_for('add_cart') }}" method="POST" class="add-to-cart-form">
+                        <input type="hidden" name="id_producto" value="{{ p.id_producto }}">
+                        
+                    <div class="talla-selector">
+                            <label for="talla_{{ p.id_producto }}">Talla:</label>
+                                <select name="talla" id="talla_{{ p.id_producto }}" required 
+                          {% if p.stock == 0 %} disabled {% endif %}
+                         >
+                            <option value="" disabled selected>Elegir talla (MX)</option>
+                                {% for t in range(25, 30) %}
+                            <option value="{{ t }}">{{ t }}.0</option>
+                            <option value="{{ t }}.5">{{ t }}.5</option>
+                                {% endfor %}
+                            <option value="30">30.0</option> 
+                    </select>
+    
+                        <label for="cantidad_{{ p.id_producto }}">Cant:</label>
+                        <input type="number" name="cantidad" id="cantidad_{{ p.id_producto }}" value="1" min="1" max="{{ p.stock }}" required 
+                             {% if p.stock == 0 %} disabled {% endif %}
+                        >
+                </div>
+
+                        <button type="submit" class="btn-primary" {% if p.stock == 0 %} disabled {% endif %}>
+                            <i class="fas fa-shopping-cart"></i> Agregar
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        
+        {% if not productos %}
+        <div class="no-products-message">
+            <h3>No hay productos disponibles en el catálogo en este momento.</h3>
+            <p>Vuleve a intentarlo déspues.</p>
+        </div>
+        {% endif %}
+        
+    </div>
+
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Mi Carrito de Compras{% endblock %}
+
+{% block content %}
+    <h2 class="page-title">🛍️ Resumen de Carrito</h2>
+
+    {% if items|length == 0 %}
+        <div class="empty-cart-message">
+            <p>Tu carrito está vacío.</p>
+            <a href="{{ url_for('index') }}" class="btn-primary">Volver al Catálogo</a>
+        </div>
+    {% else %}
+        <div class="cart-layout">
+            
+            <div class="cart-items-list">
+                {% for item in items %}
+                <div class="cart-item">
+                    
+                    <div class="item-details-group">
+                        <div class="item-image-small">
+                            {% if item.producto.imagen_url %}
+                                {% set imagen = item.producto.imagen_url %}
+                                {% if imagen.startswith('http') or imagen.startswith('/') %}
+                                    <img src="{{ imagen }}" alt="{{ item.producto.nombre }}">
+                                {% elif imagen.startswith('static/') %}
+                                    <img src="/{{ imagen }}" alt="{{ item.producto.nombre }}">
+                                {% else %}
+                                    <img src="{{ url_for('static', filename=imagen) }}" alt="{{ item.producto.nombre }}">
+                                {% endif %}
+                            {% else %}
+                                <span>IMG</span>
+                            {% endif %}
+                        </div>
+                        
+                        <div>
+                            <p class="item-name">{{ item.producto.nombre }}</p>
+                            <p class="item-size">Talla: {{ item.talla_seleccionada }}</p> 
+                            <p class="item-price-unit">Precio Unitario: ${{ "{:,.2f}".format(item.producto.precio) }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="item-summary">
+                        <p>Cantidad: <span class="item-qty">{{ item.cantidad }}</span></p>
+                        <p class="item-subtotal">Subtotal: ${{ "{:,.2f}".format(item.subtotal) }}</p>
+                    </div>
+
+                    {% set cart_key = item.producto.id_producto | string + '_' + item.talla_seleccionada | string %}
+                    <a href="{{ url_for('eliminar', cart_key=cart_key) }}" class="item-remove" title="Eliminar Producto"><i class="fas fa-trash-alt"></i></a>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="cart-summary-box">
+                <h3>Total del Pedido</h3>
+                
+                <div class="summary-total">
+                    <span>TOTAL:</span>
+                    <span>${{ "{:,.2f}".format(total) }}</span>
+                </div>
+                
+                <a href="{{ url_for('comprar') }}" class="btn-primary">
+                    Proceder a Comprar
+                </a>
+            </div>
+
+        </div>
+    {% endif %}
+
+{% endblock %}
